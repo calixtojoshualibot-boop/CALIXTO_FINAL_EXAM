@@ -1,92 +1,100 @@
-require('dotenv').config();
-const express = require('express');
-const mysql = require('mysql2/promise');
-const path = require('path');
-const cors = require('cors');
+// Use LocalStorage instead of a fake API URL
+let students = JSON.parse(localStorage.getItem('aurora_students')) || [];
 
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Database Connection using your MYSQL_URL from Render
-let pool;
-try {
-    pool = mysql.createPool(process.env.MYSQL_URL);
-    console.log("Connected to Aiven MySQL");
-} catch (err) {
-    console.error("Database Connection Failed:", err);
+function saveToLocal() {
+    localStorage.setItem('aurora_students', JSON.stringify(students));
 }
 
-// Create table if it doesn't exist
-const initDB = async () => {
-    try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS students (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id VARCHAR(50) UNIQUE NOT NULL,
-                full_name VARCHAR(100) NOT NULL,
-                course VARCHAR(100) NOT NULL,
-                year_level VARCHAR(20) NOT NULL,
-                email VARCHAR(100) NOT NULL
-            );
-        `);
-    } catch (err) {
-        console.error("Table Creation Error:", err);
-    }
-};
-initDB();
+function showHome() {
+    document.getElementById('list-section').style.display = 'block';
+    document.getElementById('form-section').style.display = 'none';
+    renderGrid();
+}
 
-// CREATE
-app.post('/api/students', async (req, res) => {
-    const { student_id, full_name, course, year_level, email } = req.body;
-    try {
-        await pool.query(
-            'INSERT INTO students (student_id, full_name, course, year_level, email) VALUES (?, ?, ?, ?, ?)',
-            [student_id, full_name, course, year_level, email]
-        );
-        res.status(201).json({ message: "Success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+function showForm(studentId = null) {
+    document.getElementById('list-section').style.display = 'none';
+    document.getElementById('form-section').style.display = 'block';
+    const form = document.getElementById('student-form');
+    
+    if (studentId) {
+        const student = students.find(s => s.id === studentId);
+        document.getElementById('form-title').innerText = 'Update Profile';
+        document.getElementById('db_id').value = student.id;
+        document.getElementById('student_id').value = student.student_id;
+        document.getElementById('full_name').value = student.full_name;
+        document.getElementById('course').value = student.course;
+        document.getElementById('year_level').value = student.year_level;
+        document.getElementById('email').value = student.email;
+    } else {
+        document.getElementById('form-title').innerText = 'Student Registration';
+        form.reset();
+        document.getElementById('db_id').value = '';
     }
-});
+}
 
-// READ
-app.get('/api/students', async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM students ORDER BY id DESC');
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+function renderGrid() {
+    const grid = document.getElementById('student-grid');
+    grid.innerHTML = '';
+    
+    students.forEach(student => {
+        const initials = student.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        grid.innerHTML += `
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="student-card shadow-sm h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="avatar-circle">${initials}</div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu shadow border-0 rounded-4">
+                                <li><a class="dropdown-item py-2" href="#" onclick="showForm(${student.id})">Edit Student</a></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="#" onclick="deleteStudent(${student.id})">Remove Record</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <span class="badge-course">${student.course}</span>
+                    <h5 class="fw-bold mb-1">${student.full_name}</h5>
+                    <p class="text-muted small mb-3">${student.student_id} • ${student.year_level}</p>
+                    <div class="pt-3 border-top d-flex align-items-center gap-2">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <span class="small text-muted text-truncate">${student.email}</span>
+                    </div>
+                </div>
+            </div>`;
+    });
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('db_id').value;
+    const studentData = {
+        id: id ? parseInt(id) : Date.now(),
+        student_id: document.getElementById('student_id').value,
+        full_name: document.getElementById('full_name').value,
+        course: document.getElementById('course').value,
+        year_level: document.getElementById('year_level').value,
+        email: document.getElementById('email').value
+    };
+
+    if (id) {
+        const index = students.findIndex(s => s.id === parseInt(id));
+        students[index] = studentData;
+    } else {
+        students.push(studentData);
     }
-});
 
-// UPDATE
-app.put('/api/students/:id', async (req, res) => {
-    const { id } = req.params;
-    const { student_id, full_name, course, year_level, email } = req.body;
-    try {
-        await pool.query(
-            'UPDATE students SET student_id=?, full_name=?, course=?, year_level=?, email=? WHERE id=?',
-            [student_id, full_name, course, year_level, email, id]
-        );
-        res.json({ message: "Updated" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    saveToLocal();
+    showHome();
+}
+
+function deleteStudent(id) {
+    if (confirm("Delete this student?")) {
+        students = students.filter(s => s.id !== id);
+        saveToLocal();
+        renderGrid();
     }
-});
+}
 
-// DELETE
-app.delete('/api/students/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        await pool.query('DELETE FROM students WHERE id = ?', [id]);
-        res.json({ message: "Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// Initial Load
+renderGrid();
