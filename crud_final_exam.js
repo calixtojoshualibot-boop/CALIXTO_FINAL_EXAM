@@ -1,9 +1,4 @@
-// Use LocalStorage instead of a fake API URL
-let students = JSON.parse(localStorage.getItem('aurora_students')) || [];
-
-function saveToLocal() {
-    localStorage.setItem('aurora_students', JSON.stringify(students));
-}
+let students = JSON.parse(localStorage.getItem('aurora_db')) || [];
 
 function showHome() {
     document.getElementById('list-section').style.display = 'block';
@@ -11,22 +6,21 @@ function showHome() {
     renderGrid();
 }
 
-function showForm(studentId = null) {
+function showForm(id = null) {
     document.getElementById('list-section').style.display = 'none';
     document.getElementById('form-section').style.display = 'block';
     const form = document.getElementById('student-form');
-    
-    if (studentId) {
-        const student = students.find(s => s.id === studentId);
-        document.getElementById('form-title').innerText = 'Update Profile';
-        document.getElementById('db_id').value = student.id;
-        document.getElementById('student_id').value = student.student_id;
-        document.getElementById('full_name').value = student.full_name;
-        document.getElementById('course').value = student.course;
-        document.getElementById('year_level').value = student.year_level;
-        document.getElementById('email').value = student.email;
+    if (id) {
+        const s = students.find(x => x.id === id);
+        document.getElementById('form-title').innerText = 'Update Student';
+        document.getElementById('db_id').value = s.id;
+        document.getElementById('student_id').value = s.student_id;
+        document.getElementById('full_name').value = s.full_name;
+        document.getElementById('course').value = s.course;
+        document.getElementById('year_level').value = s.year_level;
+        document.getElementById('email').value = s.email;
     } else {
-        document.getElementById('form-title').innerText = 'Student Registration';
+        document.getElementById('form-title').innerText = 'New Registration';
         form.reset();
         document.getElementById('db_id').value = '';
     }
@@ -35,31 +29,24 @@ function showForm(studentId = null) {
 function renderGrid() {
     const grid = document.getElementById('student-grid');
     grid.innerHTML = '';
-    
-    students.forEach(student => {
-        const initials = student.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    students.forEach(s => {
+        const initials = s.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
         grid.innerHTML += `
-            <div class="col-md-6 col-lg-4 col-xl-3">
-                <div class="student-card shadow-sm h-100">
-                    <div class="d-flex justify-content-between align-items-start">
+            <div class="col-md-4">
+                <div class="student-card shadow-sm">
+                    <div class="d-flex justify-content-between">
                         <div class="avatar-circle">${initials}</div>
                         <div class="dropdown">
-                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu shadow border-0 rounded-4">
-                                <li><a class="dropdown-item py-2" href="#" onclick="showForm(${student.id})">Edit Student</a></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="#" onclick="deleteStudent(${student.id})">Remove Record</a></li>
+                            <button class="btn btn-sm" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="showForm(${s.id})">Edit</a></li>
+                                <li><a class="dropdown-item text-danger" onclick="deleteStudent(${s.id})">Delete</a></li>
                             </ul>
                         </div>
                     </div>
-                    <span class="badge-course">${student.course}</span>
-                    <h5 class="fw-bold mb-1">${student.full_name}</h5>
-                    <p class="text-muted small mb-3">${student.student_id} • ${student.year_level}</p>
-                    <div class="pt-3 border-top d-flex align-items-center gap-2">
-                        <i class="bi bi-envelope text-muted"></i>
-                        <span class="small text-muted text-truncate">${student.email}</span>
-                    </div>
+                    <span class="badge-course">${s.course}</span>
+                    <h5 class="fw-bold mt-2">${s.full_name}</h5>
+                    <p class="text-muted small">${s.student_id} • ${s.year_level}</p>
                 </div>
             </div>`;
     });
@@ -68,7 +55,7 @@ function renderGrid() {
 function handleFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('db_id').value;
-    const studentData = {
+    const data = {
         id: id ? parseInt(id) : Date.now(),
         student_id: document.getElementById('student_id').value,
         full_name: document.getElementById('full_name').value,
@@ -78,23 +65,21 @@ function handleFormSubmit(e) {
     };
 
     if (id) {
-        const index = students.findIndex(s => s.id === parseInt(id));
-        students[index] = studentData;
+        const idx = students.findIndex(x => x.id === parseInt(id));
+        students[idx] = data;
     } else {
-        students.push(studentData);
+        students.push(data);
     }
-
-    saveToLocal();
+    localStorage.setItem('aurora_db', JSON.stringify(students));
     showHome();
 }
 
 function deleteStudent(id) {
-    if (confirm("Delete this student?")) {
-        students = students.filter(s => s.id !== id);
-        saveToLocal();
+    if (confirm("Delete record?")) {
+        students = students.filter(x => x.id !== id);
+        localStorage.setItem('aurora_db', JSON.stringify(students));
         renderGrid();
     }
 }
 
-// Initial Load
 renderGrid();
