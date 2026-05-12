@@ -1,7 +1,6 @@
 {
-  "name": "calixto-final-exam",
+  "name": "aurora-app",
   "version": "1.0.0",
-  "description": "Student Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
