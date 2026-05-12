@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora | Student Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-main: #1e293b;
+        }
+
+        body {
+            background: #f8faff;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(118, 75, 162, 0.15) 0px, transparent 50%);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* Glass Navbar */
+        .glass-nav {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--primary-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        /* Hero Section */
+        .hero-title {
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        /* Search & Filter Container */
+        .action-bar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+        }
+
+        /* Student Grid Cards */
+        .student-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            border-radius: 24px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            border-color: #e2e8f0;
+        }
+
+        .avatar-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Course Badges */
+        .badge-course {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 100px;
+            background: #f1f5f9;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Floating Action Button for Add */
+        .fab-add {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--primary-grad);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            border: none;
+            transition: 0.3s;
+            z-index: 999;
+        }
+
+        .fab-add:hover {
+            transform: scale(1.1) rotate(90deg);
+            color: white;
+        }
+
+        /* Form Overlay */
+        .modal-glass {
+            background: rgba(255, 255, 255, 0.😎 !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px !important;
+        }
+
+        .form-control-aurora {
+            background: rgba(241, 245, 249, 0.5);
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control-aurora:focus {
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="glass-nav mb-5">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="brand-logo" onclick="showHome()" style="cursor: pointer;">AURORA</div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small d-none d-md-block">Admin Portal v3.0</span>
+                <div class="vr mx-2 text-muted opacity-25"></div>
+                <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" class="rounded-circle" width="35">
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <!-- List Section -->
+        <div id="list-section">
+            <div class="row align-items-end mb-5">
+                <div class="col-lg-8">
+                    <h1 class="hero-title">Student Records</h1>
+                    <p class="text-muted fs-5">Manage and track enrollment profiles across the campus.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="action-bar d-flex align-items-center gap-2">
+                        <i class="bi bi-search text-muted"></i>
+                        <input type="text" class="border-0 bg-transparent w-100 outline-none" placeholder="Search record..." style="outline: none;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" id="student-grid">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div id="form-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-md-7">
+                    <div class="student-card shadow-sm border-0 p-5">
+                        <div class="text-center mb-5">
+                            <div class="brand-logo mb-2">AURORA</div>
+                            <h3 id="form-title" class="fw-bold">Student Registration</h3>
+                        </div>
+                        <form id="student-form" onsubmit="handleFormSubmit(event)">
+                            <input type="hidden" id="db_id">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Student ID</label>
+                                    <input type="text" id="student_id" class="form-control form-control-aurora" placeholder="2024-001" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Full Name</label>
+                                    <input type="text" id="full_name" class="form-control form-control-aurora" placeholder="John Doe" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Course</label>
+                                    <input type="text" id="course" class="form-control form-control-aurora" placeholder="Information Tech" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Year Level</label>
+                                    <select id="year_level" class="form-select form-control-aurora" required>
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold">Email Address</label>
+                                    <input type="email" id="email" class="form-control form-control-aurora" placeholder="email@university.edu" required>
+                                </div>
+                            </div>
+                            <div class="mt-5 d-flex gap-2">
+                                <button type="submit" class="btn btn-dark py-3 w-100 rounded-4 fw-bold">Save Record</button>
+                                <button type="button" class="btn btn-light py-3 w-100 rounded-4 fw-bold" onclick="showHome()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab-add" onclick="showForm()">
+        <i class="bi bi-plus"></i>
+    </button>
+
+    <script>
+        const API_URL = '/api/students';
+
+        function showHome() {
+            document.getElementById('list-section').style.display = 'block';
+            document.getElementById('form-section').style.display = 'none';
+            fetchStudents();
+        }
+
+        function showForm(student = null) {
+            document.getElementById('list-section').style.display = 'none';
+            document.getElementById('form-section').style.display = 'block';
+            const form = document.getElementById('student-form');
+            if (student) {
+                document.getElementById('form-title').innerText = 'Update Profile';
+                document.getElementById('db_id').value = student.id;
+                document.getElementById('student_id').value = student.student_id;
+                document.getElementById('full_name').value = student.full_name;
+                document.getElementById('course').value = student.course;
+                document.getElementById('year_level').value = student.year_level;
+                document.getElementById('email').value = student.email;
+            } else {
+                document.getElementById('form-title').innerText = 'Student Registration';
+                form.reset();
+                document.getElementById('db_id').value = '';
+            }
+        }
+
+        async function fetchStudents() {
+            try {
+                const response = await fetch(API_URL);
+                const students = await response.json();
+                const grid = document.getElementById('student-grid');
+                grid.innerHTML = '';
+
+                students.forEach(student => {
+                    const initials = student.full_name.split(' ').map(n => n[0]).join('').substring(0,2);
+                    
+                    grid.innerHTML += `
+                        <div class="col-md-6 col-lg-4 col-xl-3">
+                            <div class="student-card shadow-sm h-100">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="avatar-circle">${initials}</div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow border-0 rounded-4">
+                                            <li><a class="dropdown-item py-2" href="#" onclick='editStudent(${JSON.stringify(student)})'>Edit Student</a></li>
+                                            <li><a class="dropdown-item py-2 text-danger" href="#" onclick="deleteStudent(${student.id})">Remove Record</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <span class="badge-course">${student.course}</span>
+                                <h5 class="fw-bold mb-1">${student.full_name}</h5>
+                                <p class="text-muted small mb-3">${student.student_id} • ${student.year_level}</p>
+                                <div class="pt-3 border-top d-flex align-items-center gap-2">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                    <span class="small text-muted text-truncate">${student.email}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) { console.error("Grid load error", err); }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('db_id').value;
+            const studentData = {
+                student_id: document.getElementById('student_id').value,
+                full_name: document.getElementById('full_name').value,
+                course: document.getElementById('course').value,
+                year_level: document.getElementById('year_level').value,
+                email: document.getElementById('email').value
+            };
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? ${API_URL}/${id} : API_URL;
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(studentData)
+                });
+                if(response.ok) showHome();
+            } catch (err) { alert("Failed to save."); }
+        }
+
+        function editStudent(student) { showForm(student); }
+
+        async function deleteStudent(id) {
+            if (confirm("Delete this student permanently?")) {
+                await fetch(${API_URL}/${id}, { method: 'DELETE' });
+                fetchStudents();
+            }
+        }
+
+        fetchStudents();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
