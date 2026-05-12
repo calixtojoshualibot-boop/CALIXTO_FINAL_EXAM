@@ -1,22 +1,31 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
-// This ensures the server looks in the correct directory regardless of where it's launched from
-const publicPath = path.join(__dirname, ''); 
+// Log what files are actually there to the Render logs
+const files = fs.readdirSync(__dirname);
+console.log("Files found in root:", files);
 
-app.use(express.static(publicPath));
+app.use(express.static(__dirname));
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(publicPath, 'index.html'), (err) => {
-        if (err) {
-            res.status(404).send("File not found! Make sure index.html is in the root folder.");
-        }
-    });
+    const indexPath = path.join(__dirname, 'index.html');
+    
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        // This will print the actual files to your browser screen so we can see the mistake
+        res.status(404).send(`
+            <h1>File Not Found</h1>
+            <p>The server is looking for <b>index.html</b> but it's not here.</p>
+            <p><b>Files actually present:</b> ${files.join(', ')}</p>
+            <p><i>Hint: Check if your file is named "Index.html" with a capital I.</i></p>
+        `);
+    }
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is live at port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
