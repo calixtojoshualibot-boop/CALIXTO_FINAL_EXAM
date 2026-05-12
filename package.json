@@ -4,7 +4,7 @@
   "description": "Final Exam CRUD Application",
   "main": "crud_final_exam.js",
   "scripts": {
-  "start": "node server.js"
+  "start": "crud_final_exam.js"
 },
   "dependencies": {
   "cors": "^2.8.5",
