@@ -1,16 +1,12 @@
 {
-  "name": "aurora-student-management",
+  "name": "calixto-final-exam",
   "version": "1.0.0",
-  "description": "Student management system with glassmorphism UI",
+  "description": "Student Management System",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "engines": {
-    "node": ">=14.0.0"
   }
 }
